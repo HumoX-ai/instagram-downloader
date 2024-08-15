@@ -1,6 +1,5 @@
 import { Bot, webhookCallback } from "grammy";
 import instagramDl from "@sasmeee/igdl";
-import tik from "rahad-media-downloader";
 import express from "express";
 
 // Bot tokenni kiriting
