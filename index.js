@@ -1,11 +1,10 @@
-// require("dotenv").config({ path: ".env" });
 const { Bot, webhookCallback } = require("grammy");
 const instagramDl = require("@sasmeee/igdl");
 const { alldl } = require("rahad-all-downloader");
 const express = require("express");
 
 // Bot tokenni kiriting
-const bot = new Bot("2124012147:AAHLrHAt36dllh_uAgQiKXmdmHfy7kcwhqA");
+const bot = new Bot("1835122693:AAGXn10Cs_0KPYFL2hatEHGMomABzq-KJcg");
 
 // Instagram videoni yuklab olish uchun funksiya
 async function downloadInstagramVideo(url) {
@@ -21,9 +20,9 @@ async function downloadInstagramVideo(url) {
 
 async function downloadTikTokVideo(url) {
   try {
-    const result = await alldl(url);
-    console.log(result.data.videoUrl);
-    return result.data.videoUrl;
+    const result = await tik.rahadtikdl(url);
+    console.log(result.data.noWatermarkMp4);
+    return result.data.noWatermarkMp4;
   } catch (error) {
     console.error("Error:", error.message);
   }
@@ -33,11 +32,6 @@ function isValidInstagramUrl(url) {
   const instagramUrlPattern =
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/[^\s/]+\/[^\s/]+\/?/;
   return instagramUrlPattern.test(url);
-}
-
-function isValidTikTokUrl(url) {
-  const tikTokUrlPattern = /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@?/;
-  return tikTokUrlPattern.test(url);
 }
 
 // /start komandasi
@@ -50,18 +44,18 @@ bot.command("start", (ctx) =>
 // Foydalanuvchi link yuborganda
 bot.on("message:text", async (ctx) => {
   const url = ctx.message.text;
+  // if (!isValidInstagramUrl(url)) {
+  //   await ctx.reply("Iltimos, to'g'ri Instagram URL manzilini yuboring.");
+  //   return;
+  // }
 
   // Foydalanuvchiga typing faoliyatini ko'rsatish
   await ctx.replyWithChatAction("upload_video");
   let videoUrl;
-
   if (isValidInstagramUrl(url)) {
     videoUrl = await downloadInstagramVideo(url);
-  } else if (isValidTikTokUrl(url)) {
-    videoUrl = await downloadTikTokVideo(url);
   } else {
-    await ctx.reply("Link noto'g'ri kiritildi");
-    return;
+    videoUrl = await downloadTikTokVideo(url);
   }
 
   if (videoUrl) {
