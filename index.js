@@ -17,16 +17,6 @@ async function downloadInstagramVideo(url) {
   }
 }
 
-async function downloadTikTokVideo(url) {
-  try {
-    const result = await tik.rahadtikdl(url);
-    console.log(result.data.noWatermarkMp4);
-    return result.data.noWatermarkMp4;
-  } catch (error) {
-    console.error("Error:", error.message);
-  }
-}
-
 function isValidInstagramUrl(url) {
   const instagramUrlPattern =
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/[^\s/]+\/[^\s/]+\/?/;
@@ -43,28 +33,21 @@ bot.command("start", (ctx) =>
 // Foydalanuvchi link yuborganda
 bot.on("message:text", async (ctx) => {
   const url = ctx.message.text;
-  // if (!isValidInstagramUrl(url)) {
-  //   await ctx.reply("Iltimos, to'g'ri Instagram URL manzilini yuboring.");
-  //   return;
-  // }
+  if (!isValidInstagramUrl(url)) {
+    await ctx.reply("Iltimos, to'g'ri Instagram URL manzilini yuboring.");
+    return;
+  }
 
   // Foydalanuvchiga typing faoliyatini ko'rsatish
   await ctx.replyWithChatAction("upload_video");
-  let videoUrl;
-  if (isValidInstagramUrl(url)) {
-    videoUrl = await downloadInstagramVideo(url);
-  } else {
-    videoUrl = await downloadTikTokVideo(url);
-  }
 
+  const videoUrl = await downloadInstagramVideo(url);
   if (videoUrl) {
     await ctx.replyWithVideo(videoUrl);
   } else {
     await ctx.reply("Video yuklab olishda xatolik yuz berdi");
   }
 });
-
-bot.start();
 
 // Express serverini yaratish
 const app = express();
