@@ -1,7 +1,7 @@
-const { Bot, webhookCallback } = require("grammy");
-const instagramDl = require("@sasmeee/igdl");
-const { alldl } = require("rahad-all-downloader");
-const express = require("express");
+import { Bot, webhookCallback } from "grammy";
+import instagramDl from "@sasmeee/igdl";
+import tik from "rahad-media-downloader";
+import express from "express";
 
 // Bot tokenni kiriting
 const bot = new Bot("1835122693:AAGXn10Cs_0KPYFL2hatEHGMomABzq-KJcg");
