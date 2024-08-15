@@ -1,14 +1,15 @@
 import { Bot, webhookCallback } from "grammy";
 import instagramDl from "@sasmeee/igdl";
+import express from "express";
 
-// Bot tokenni o'zgartiring
-const bot = new Bot("YOUR_BOT_TOKEN");
+// Bot tokenni kiriting
+const bot = new Bot("2124012147:AAHLrHAt36dllh_uAgQiKXmdmHfy7kcwhqA");
 
 // Instagram videoni yuklab olish uchun funksiya
 async function downloadInstagramVideo(url) {
   try {
     const dataList = await instagramDl(url);
-    const downloadLink = dataList[0]?.download_link;
+    const downloadLink = dataList[0]?.download_link; // dataList[0] - birinchi video ma'lumotlari
     console.log(downloadLink);
     return downloadLink;
   } catch (error) {
@@ -37,10 +38,10 @@ bot.on("message:text", async (ctx) => {
     return;
   }
 
+  // Foydalanuvchiga typing faoliyatini ko'rsatish
   await ctx.replyWithChatAction("upload_video");
 
   const videoUrl = await downloadInstagramVideo(url);
-
   if (videoUrl) {
     await ctx.replyWithVideo(videoUrl);
   } else {
@@ -48,5 +49,13 @@ bot.on("message:text", async (ctx) => {
   }
 });
 
-// Webhook handler
-export default webhookCallback(bot, "http");
+// Express serverini yaratish
+const app = express();
+app.use(express.json());
+
+app.use(webhookCallback(bot, "express"));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
