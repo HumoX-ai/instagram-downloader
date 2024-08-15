@@ -4,7 +4,7 @@ import tik from "rahad-media-downloader";
 import express from "express";
 
 // Bot tokenni kiriting
-const bot = new Bot("1835122693:AAGXn10Cs_0KPYFL2hatEHGMomABzq-KJcg");
+const bot = new Bot("2124012147:AAHLrHAt36dllh_uAgQiKXmdmHfy7kcwhqA");
 
 // Instagram videoni yuklab olish uchun funksiya
 async function downloadInstagramVideo(url) {
@@ -68,12 +68,12 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 
 // Express serverini yaratish
-const app = express();
-app.use(express.json());
+// const app = express();
+// app.use(express.json());
 
-app.use(webhookCallback(bot, "express"));
+// app.use(webhookCallback(bot, "express"));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
