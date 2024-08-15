@@ -2,7 +2,7 @@
   "name": "instagram-downloader",
   "version": "1.0.0",
   "type": "module",
-  "main": "bot.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },

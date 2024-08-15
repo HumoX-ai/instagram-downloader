@@ -1,18 +1,18 @@
 import { Bot, webhookCallback } from "grammy";
-import express from "express";
 import instagramDl from "@sasmeee/igdl";
 
-const bot = new Bot("SIZNING_BOT_TOKEN");
-const app = express();
+// Bot tokenni o'zgartiring
+const bot = new Bot("YOUR_BOT_TOKEN");
 
-// Instagram video yuklab olish funksiyasi
+// Instagram videoni yuklab olish uchun funksiya
 async function downloadInstagramVideo(url) {
   try {
     const dataList = await instagramDl(url);
     const downloadLink = dataList[0]?.download_link;
+    console.log(downloadLink);
     return downloadLink;
   } catch (error) {
-    console.error("Xatolik:", error);
+    console.error("Error:", error);
   }
 }
 
@@ -22,14 +22,14 @@ function isValidInstagramUrl(url) {
   return instagramUrlPattern.test(url);
 }
 
-// /start komanda
+// /start komandasi
 bot.command("start", (ctx) =>
   ctx.reply(
-    "Instagram video yuklab olish botiga xush kelibsiz! Video yuklash uchun linkni yuboring."
+    "Instagram video yuklab olish botiga xush kelibsiz! Video yuklash uchun link tashlang"
   )
 );
 
-// Matnli xabarlarni qayta ishlash
+// Foydalanuvchi link yuborganda
 bot.on("message:text", async (ctx) => {
   const url = ctx.message.text;
   if (!isValidInstagramUrl(url)) {
@@ -44,20 +44,9 @@ bot.on("message:text", async (ctx) => {
   if (videoUrl) {
     await ctx.replyWithVideo(videoUrl);
   } else {
-    await ctx.reply("Video yuklab olishda xatolik yuz berdi.");
+    await ctx.reply("Video yuklab olishda xatolik yuz berdi");
   }
 });
 
-// Webhook endpointini sozlash
-app.use(express.json());
-app.use(`/api/${bot.token}`, webhookCallback(bot, "express"));
-
-// Serverni sozlash
-export default function handler(req, res) {
-  return new Promise((resolve, reject) => {
-    app(req, res, (err) => {
-      if (err) return reject(err);
-      return resolve();
-    });
-  });
-}
+// Webhook handler
+export default webhookCallback(bot, "http");
