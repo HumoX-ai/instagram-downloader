@@ -1,17 +1,16 @@
 import { Bot, webhookCallback } from "grammy";
-import instagramDl from "@sasmeee/igdl";
+import s from "videos-downloader";
 import express from "express";
 
 // Bot tokenni kiriting
 const bot = new Bot("2124012147:AAHLrHAt36dllh_uAgQiKXmdmHfy7kcwhqA");
 
 // Instagram videoni yuklab olish uchun funksiya
-async function downloadInstagramVideo(url) {
+async function downloadInstagramContent(url) {
   try {
-    const dataList = await instagramDl(url);
-    const downloadLink = dataList[0]?.download_link; // dataList[0] - birinchi video ma'lumotlari
-    console.log(downloadLink);
-    return downloadLink;
+    const dataList = await s.instagram(url);
+    console.log(dataList.url_list);
+    return dataList.url_list; // URL manzillarni olamiz (rasm yoki video bo'lishi mumkin)
   } catch (error) {
     console.error("Error:", error);
   }
@@ -39,13 +38,30 @@ bot.on("message:text", async (ctx) => {
   }
 
   // Foydalanuvchiga typing faoliyatini ko'rsatish
-  await ctx.replyWithChatAction("upload_video");
+  await ctx.replyWithChatAction("typing");
 
-  const videoUrl = await downloadInstagramVideo(url);
-  if (videoUrl) {
-    await ctx.replyWithVideo(videoUrl);
+  const contentUrls = await downloadInstagramContent(url);
+  if (contentUrls && contentUrls.length > 0) {
+    if (contentUrls.length === 1) {
+      // Agar faqat bitta media bo'lsa, to'g'ridan-to'g'ri yuboriladi
+      const mediaUrl = contentUrls[0];
+      if (mediaUrl.includes("/ig/")) {
+        await ctx.replyWithVideo(mediaUrl);
+      } else {
+        await ctx.replyWithPhoto(mediaUrl);
+      }
+    } else {
+      // Agar bir nechta media bo'lsa, media guruh sifatida yuboriladi
+      const mediaGroup = contentUrls.map((mediaUrl) => {
+        return {
+          type: mediaUrl.includes("/ig/") ? "video" : "photo",
+          media: mediaUrl,
+        };
+      });
+      await ctx.replyWithMediaGroup(mediaGroup);
+    }
   } else {
-    await ctx.reply("Video yuklab olishda xatolik yuz berdi");
+    await ctx.reply("Kontentni yuklab olishda xatolik yuz berdi");
   }
 });
 
