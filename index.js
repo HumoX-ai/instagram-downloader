@@ -1,67 +1,88 @@
 import { Bot, webhookCallback } from "grammy";
-import s from "videos-downloader";
+import dotenv from "dotenv";
+import fs from "fs";
+import {
+  downloadInstagramContent,
+  downloadTikTokContent,
+} from "./src/download.js";
+import isValidUrl from "./src/validation.js";
+dotenv.config();
 import express from "express";
 
 // Bot tokenni kiriting
-const bot = new Bot("2124012147:AAHLrHAt36dllh_uAgQiKXmdmHfy7kcwhqA");
-
-// Instagram videoni yuklab olish uchun funksiya
-async function downloadInstagramContent(url) {
-  try {
-    const dataList = await s.instagram(url);
-    console.log(dataList.url_list);
-    return dataList.url_list; // URL manzillarni olamiz (rasm yoki video bo'lishi mumkin)
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-
-function isValidInstagramUrl(url) {
-  const instagramUrlPattern =
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/[^\s/]+\/[^\s/]+\/?/;
-  return instagramUrlPattern.test(url);
-}
+const bot = new Bot(process.env.BOT_TOKEN);
 
 // /start komandasi
-bot.command("start", (ctx) =>
+bot.command("start", (ctx) => {
+  const userId = ctx.from.id;
+  const userName = ctx.from.username;
+  console.log(ctx.from);
+
+  const users = JSON.parse(fs.readFileSync("users.json"));
+  if (!users.users.some((user) => user.userId === userId)) {
+    users.users.push({ userId, userName });
+    fs.writeFileSync("users.json", JSON.stringify(users, null, 2));
+  }
   ctx.reply(
     "Instagram video yuklab olish botiga xush kelibsiz! Video yuklash uchun link tashlang"
+  );
+});
+
+bot.command("help", (ctx) =>
+  ctx.reply(
+    "Bu bot orqali Instagram yoki TikTok'dan video yuklab olishingiz mumkin. Linkni yuboring, va video yuklab olinadi."
+  )
+);
+
+bot.on(":new_chat_members", (ctx) =>
+  ctx.reply(
+    "Xush kelibsiz! Instagram yoki TikTok'dan video yuklab olish uchun link yuboring."
   )
 );
 
 // Foydalanuvchi link yuborganda
 bot.on("message:text", async (ctx) => {
-  const url = ctx.message.text;
-  if (!isValidInstagramUrl(url)) {
-    await ctx.reply("Iltimos, to'g'ri Instagram URL manzilini yuboring.");
-    return;
-  }
+  try {
+    const url = ctx.message.text;
 
-  // Foydalanuvchiga typing faoliyatini ko'rsatish
-  await ctx.replyWithChatAction("typing");
+    if (!isValidUrl(url)) {
+      await ctx.reply("Iltimos, to'g'ri URL manzilini yuboring.");
+      return;
+    }
 
-  const contentUrls = await downloadInstagramContent(url);
-  if (contentUrls && contentUrls.length > 0) {
-    if (contentUrls.length === 1) {
-      // Agar faqat bitta media bo'lsa, to'g'ridan-to'g'ri yuboriladi
-      const mediaUrl = contentUrls[0];
-      if (mediaUrl.includes("/ig/")) {
-        await ctx.replyWithVideo(mediaUrl);
+    // Foydalanuvchiga typing faoliyatini ko'rsatish
+    await ctx.replyWithChatAction("typing");
+
+    if (url.includes("instagram.com")) {
+      const contentUrls = await downloadInstagramContent(url);
+      if (contentUrls && contentUrls.length > 0) {
+        const mediaGroup = contentUrls.map((url) => ({
+          type: "video",
+          media: url,
+        }));
+        await ctx.replyWithMediaGroup(mediaGroup);
       } else {
-        await ctx.replyWithPhoto(mediaUrl);
+        await ctx.reply(
+          "Iltimos, to'g'ri Instagram URL manzilini yuboring yoki URL'da kontent mavjudligiga ishonch hosil qiling."
+        );
+      }
+    } else if (url.includes("tiktok.com")) {
+      const contentUrl = await downloadTikTokContent(url);
+      if (contentUrl) {
+        await ctx.replyWithVideo(contentUrl);
+      } else {
+        await ctx.reply("Iltimos, to'g'ri TikTok URL manzilini yuboring.");
       }
     } else {
-      // Agar bir nechta media bo'lsa, media guruh sifatida yuboriladi
-      const mediaGroup = contentUrls.map((mediaUrl) => {
-        return {
-          type: mediaUrl.includes("/ig/") ? "video" : "photo",
-          media: mediaUrl,
-        };
-      });
-      await ctx.replyWithMediaGroup(mediaGroup);
+      await ctx.reply(
+        "Iltimos, to'g'ri Instagram yoki TikTok URL manzilini yuboring."
+      );
     }
-  } else {
-    await ctx.reply("Kontentni yuklab olishda xatolik yuz berdi");
+  } catch (error) {
+    console.error("Xatolik yuz berdi:", error);
+    await ctx.reply(
+      "Nimadir noto'g'ri ketdi. Iltimos, keyinroq qayta urinib ko'ring."
+    );
   }
 });
 
