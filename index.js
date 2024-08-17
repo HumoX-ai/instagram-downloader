@@ -11,17 +11,10 @@ const bot = new Bot(process.env.BOT_TOKEN);
 
 // /start komandasi
 bot.command("start", (ctx) => {
-  const userId = ctx.from.id;
-  const userName = ctx.from.username;
-  console.log(ctx.from);
+  const userName = ctx.from.first_name;
 
-  const users = JSON.parse(fs.readFileSync("users.json"));
-  if (!users.users.some((user) => user.userId === userId)) {
-    users.users.push({ userId, userName });
-    fs.writeFileSync("users.json", JSON.stringify(users, null, 2));
-  }
   ctx.reply(
-    "Instagram video yuklab olish botiga xush kelibsiz! Video yuklash uchun link tashlang"
+    ` Hayrli kun ${userName}, Instagram video yuklab olish botiga xush kelibsiz! Video yuklash uchun link tashlang`
   );
 });
 
