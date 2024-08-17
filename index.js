@@ -1,10 +1,7 @@
 import { Bot, webhookCallback } from "grammy";
 import dotenv from "dotenv";
 import fs from "fs";
-import {
-  downloadInstagramContent,
-  downloadTikTokContent,
-} from "./src/download.js";
+import { downloadInstagramContent } from "./src/download.js";
 import isValidUrl from "./src/validation.js";
 dotenv.config();
 import express from "express";
@@ -67,12 +64,12 @@ bot.on("message:text", async (ctx) => {
         );
       }
     } else if (url.includes("tiktok.com")) {
-      const contentUrl = await downloadTikTokContent(url);
-      if (contentUrl) {
-        await ctx.replyWithVideo(contentUrl);
-      } else {
-        await ctx.reply("Iltimos, to'g'ri TikTok URL manzilini yuboring.");
-      }
+      // const contentUrl = await downloadTikTokContent(url);
+      // if (contentUrl) {
+      //   await ctx.replyWithVideo(contentUrl);
+      // } else {
+      //   await ctx.reply("Iltimos, to'g'ri TikTok URL manzilini yuboring.");
+      // }
     } else {
       await ctx.reply(
         "Iltimos, to'g'ri Instagram yoki TikTok URL manzilini yuboring."
