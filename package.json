@@ -20,6 +20,7 @@
     "dotenv": "^16.4.5",
     "downlib": "^1.2.7",
     "express": "^4.19.2",
+    "file-type": "^19.4.1",
     "fluent-ffmpeg": "^2.1.3",
     "grammy": "^1.28.0",
     "imran-downloader-servar": "^2.3.9",
