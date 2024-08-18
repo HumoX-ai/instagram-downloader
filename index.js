@@ -1,7 +1,9 @@
 import { Bot, webhookCallback } from "grammy";
 import dotenv from "dotenv";
-import fs from "fs";
-import { downloadInstagramContent } from "./src/download.js";
+import {
+  downloadInstagramContent,
+  downloadTikTokContent,
+} from "./src/download.js";
 import isValidUrl from "./src/validation.js";
 dotenv.config();
 import express from "express";
@@ -57,16 +59,12 @@ bot.on("message:text", async (ctx) => {
         );
       }
     } else if (url.includes("tiktok.com")) {
-      // const contentUrl = await downloadTikTokContent(url);
-      if (true) {
-        // const mediaGroup = contentUrl.map((url) => ({
-        //   type: "video",
-        //   media: url,
-        // }));
-        // await ctx.replyWithMediaGroup(mediaGroup);
-        await ctx.reply(
-          "Hozircha tik tok uchun video yuklay olmaysiz. Buning ustida ishlamoqdaman"
-        );
+      const contentUrl = await downloadTikTokContent(url);
+      if (contentUrl) {
+        await ctx.replyWithVideo(contentUrl);
+        // await ctx.reply(
+        //   "Hozircha tik tok uchun video yuklay olmaysiz. Buning ustida ishlamoqdaman"
+        // );
       } else {
         await ctx.reply("Iltimos, to'g'ri TikTok URL manzilini yuboring.");
       }
